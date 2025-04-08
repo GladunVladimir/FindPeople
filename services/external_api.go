@@ -2,7 +2,7 @@ package services
 
 import (
 	"encoding/json"
-	"io"
+	"log"
 	"net/http"
 )
 
@@ -11,12 +11,20 @@ func FetchAge(name string) (int, error) {
 	if err != nil {
 		return 0, err
 	}
-	defer resp.Body.Close()
+
+	defer func() {
+		if err := resp.Body.Close(); err != nil {
+			log.Printf("error closing response body: %v", err)
+		}
+	}()
 
 	var result struct {
 		Age int `json:"age"`
 	}
-	json.NewDecoder(resp.Body).Decode(&result)
+	err = json.NewDecoder(resp.Body).Decode(&result)
+	if err != nil {
+		return 0, err
+	}
 	return result.Age, nil
 }
 
@@ -25,35 +33,45 @@ func FetchGender(name string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	defer func(Body io.ReadCloser) {
-		err := Body.Close()
-		if err != nil {
 
+	defer func() {
+		if err := resp.Body.Close(); err != nil {
+			log.Printf("error closing response body: %v", err)
 		}
-	}(resp.Body)
+	}()
 
 	var result struct {
 		Gender string `json:"gender"`
 	}
+
 	err = json.NewDecoder(resp.Body).Decode(&result)
+
 	if err != nil {
 		return "", err
 	}
+
 	return result.Gender, nil
 }
 
 func FetchNationality(name string) (string, error) {
 	resp, err := http.Get("https://api.nationalize.io?name=" + name)
+
 	if err != nil {
 		return "", err
 	}
-	defer resp.Body.Close()
+
+	defer func() {
+		if err := resp.Body.Close(); err != nil {
+			log.Printf("error closing response body: %v", err)
+		}
+	}()
 
 	var result struct {
 		Country []struct {
 			CountryID string `json:"country_id"`
 		} `json:"country"`
 	}
+
 	err = json.NewDecoder(resp.Body).Decode(&result)
 	if err != nil {
 		return "", err
@@ -62,5 +80,6 @@ func FetchNationality(name string) (string, error) {
 	if len(result.Country) > 0 {
 		return result.Country[0].CountryID, nil
 	}
+
 	return "", nil
 }
