@@ -43,19 +43,15 @@ func FetchGender(name string) (string, error) {
 	var result struct {
 		Gender string `json:"gender"`
 	}
-
 	err = json.NewDecoder(resp.Body).Decode(&result)
-
 	if err != nil {
 		return "", err
 	}
-
 	return result.Gender, nil
 }
 
 func FetchNationality(name string) (string, error) {
 	resp, err := http.Get("https://api.nationalize.io?name=" + name)
-
 	if err != nil {
 		return "", err
 	}
@@ -71,7 +67,6 @@ func FetchNationality(name string) (string, error) {
 			CountryID string `json:"country_id"`
 		} `json:"country"`
 	}
-
 	err = json.NewDecoder(resp.Body).Decode(&result)
 	if err != nil {
 		return "", err
