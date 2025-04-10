@@ -1,0 +1,195 @@
+definitions:
+  handlers.ErrorResponse:
+    properties:
+      error:
+        example: Invalid input
+        type: string
+    type: object
+  handlers.MessageResponse:
+    properties:
+      message:
+        example: Friends linked
+        type: string
+    type: object
+  models.CreatePersonInput:
+    properties:
+      full_name:
+        example: Ivan Ivanov
+        type: string
+    type: object
+  models.FriendInput:
+    properties:
+      friend_id:
+        example: 2
+        type: integer
+    type: object
+  models.Person:
+    properties:
+      age:
+        type: integer
+      friends:
+        items:
+          $ref: '#/definitions/models.Person'
+        type: array
+      full_name:
+        type: string
+      gender:
+        type: string
+      id:
+        type: integer
+      nationality:
+        type: string
+    type: object
+info:
+  contact: {}
+paths:
+  /people:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Person'
+            type: array
+      summary: Получить всех людей
+      tags:
+      - People
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Данные человека
+        in: body
+        name: person
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreatePersonInput'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Person'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      summary: Создать человека
+      tags:
+      - People
+  /people/{id}:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: ID человека
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Новые данные
+        in: body
+        name: person
+        required: true
+        schema:
+          $ref: '#/definitions/models.Person'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Person'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      summary: Обновить данные человека
+      tags:
+      - People
+  /people/{id}/friends:
+    get:
+      parameters:
+      - description: ID пользователя
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Person'
+            type: array
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      summary: Получить друзей пользователя
+      tags:
+      - People
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: ID пользователя
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: ID друга
+        in: body
+        name: friend
+        required: true
+        schema:
+          $ref: '#/definitions/models.FriendInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.MessageResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      summary: Добавить друга
+      tags:
+      - People
+  /people/by-lastname/{lastname}:
+    get:
+      parameters:
+      - description: Фамилия
+        in: path
+        name: lastname
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Person'
+            type: array
+      summary: Найти человека по фамилии
+      tags:
+      - People
+swagger: "2.0"
