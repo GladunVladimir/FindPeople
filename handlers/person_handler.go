@@ -5,6 +5,7 @@ import (
 	"FindPeople/models"
 	"FindPeople/services"
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 	"net/http"
 	"strings"
 )
@@ -60,7 +61,7 @@ func GetAllPeople(c *gin.Context) {
 func GetPersonByLastName(c *gin.Context) {
 	lastname := c.Param("lastname")
 	var people []models.Person
-	database.DB.Where("full_name ILIKE ?", "% "+lastname).Find(&people)
+	database.DB.Where("full_name ILIKE ?", "%"+lastname+"%").Find(&people)
 	c.JSON(http.StatusOK, people)
 }
 
@@ -122,12 +123,18 @@ func AddFriend(c *gin.Context) {
 		return
 	}
 
-	err := database.DB.Model(&person).Association("Friends").Append(&friend)
+	err := database.DB.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Model(&person).Association("Friends").Append(&friend); err != nil {
+			return err
+		}
+		if err := tx.Model(&friend).Association("Friends").Append(&person); err != nil {
+			return err
+		}
+		return nil
+	})
+
 	if err != nil {
-		return
-	}
-	err = database.DB.Model(&friend).Association("Friends").Append(&person)
-	if err != nil {
+		c.JSON(http.StatusInternalServerError, ErrorResponse{Error: err.Error()})
 		return
 	}
 
