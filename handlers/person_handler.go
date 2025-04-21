@@ -3,11 +3,12 @@ package handlers
 import (
 	"FindPeople/database"
 	"FindPeople/models"
-	"FindPeople/services"
-	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
+	"FindPeople/service"
 	"net/http"
 	"strings"
+
+	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
 // CreatePerson создает нового пользователя по имени и связывает с внешними API.
@@ -26,9 +27,9 @@ func CreatePerson(c *gin.Context) {
 		return
 	}
 	firstName := strings.Split(input.FullName, " ")[0]
-	age, _ := services.FetchAge(firstName)
-	gender, _ := services.FetchGender(firstName)
-	nationality, _ := services.FetchNationality(firstName)
+	age, _ := service.FetchAge(firstName)
+	gender, _ := service.FetchGender(firstName)
+	nationality, _ := service.FetchNationality(firstName)
 	person := models.Person{
 		FullName:    input.FullName,
 		Gender:      gender,

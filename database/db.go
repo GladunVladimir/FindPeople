@@ -1,7 +1,6 @@
 package database
 
 import (
-	"FindPeople/models"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"log"
@@ -16,8 +15,8 @@ func ConnectDB() {
 	if err != nil {
 		log.Fatal("Failed to connect to database:", err)
 	}
-	err = DB.AutoMigrate(&models.Person{})
-	if err != nil {
-		return
-	}
+	//err = DB.AutoMigrate(&models.Person{})
+	//if err != nil {
+	//	return
+	//}
 }
